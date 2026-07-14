@@ -1,0 +1,38 @@
+{
+    "name" : "星云答题",
+    "appid" : "__UNI__472E07E",
+    "description" : "星云大数据·职工AI知识答题小程序",
+    "versionName" : "1.0.0",
+    "versionCode" : "100",
+    "transformPx" : false,
+    "mp-weixin" : {
+        "appid" : "",
+        "setting" : {
+            "urlCheck" : false,
+            "es6" : true,
+            "postcss" : true,
+            "minified" : true,
+            "newFeature" : true
+        },
+        "usingComponents" : true,
+        "permission" : {
+            "scope.userLocation" : {
+                "desc" : "用于获取您的位置信息"
+            }
+        },
+        "requiredPrivateInfos" : [],
+        "lazyCodeLoading" : "requiredComponents"
+    },
+    "h5" : {
+        "router" : {
+            "mode" : "hash",
+            "base" : ""
+        },
+        "title" : "星云答题",
+        "domain" : ""
+    },
+    "uniStatistics" : {
+        "enable" : false
+    },
+    "vueVersion" : "3"
+}
