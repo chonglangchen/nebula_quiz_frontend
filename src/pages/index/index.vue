@@ -206,6 +206,16 @@ function goHistory() {
     }
   }
 
+  &__user-name {
+    display: block;
+    font-family: $font-display;
+    font-size: $text-h1;
+    font-weight: 700;
+    color: $text-inverse;
+    letter-spacing: $tracking-heading;
+    margin-top: 4rpx;
+  }
+
   &__progress-box {
     text-align: center;
     padding: $spacing-4 0;

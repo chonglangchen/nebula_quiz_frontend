@@ -11,7 +11,8 @@
         </view>
         <view class="quiz__navbar-right">
           <n-quiz-timer
-            :expired-at="session?.expiresAt"
+            v-if="session"
+            :expired-at="session.expiresAt"
             :duration-seconds="1800"
             @timeout="handleTimeout"
           />
@@ -37,6 +38,7 @@
       class="quiz__swiper"
       :current="currentQuestionIndex"
       :duration="300"
+      :style="{ height: swiperHeight + 'px' }"
       @change="handleSwipeChange"
       @animationfinish="handleSwipeFinish"
     >
@@ -59,6 +61,11 @@
         </scroll-view>
       </swiper-item>
     </swiper>
+
+    <!-- Error state -->
+    <view v-else class="quiz__loading">
+      <text>加载失败，请返回重试</text>
+    </view>
 
     <!-- Bottom action bar -->
     <view v-if="session" class="quiz__footer">
@@ -112,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useQuizStore } from '@/store/quiz'
 import { useUserStore } from '@/store/user'
 
@@ -123,8 +130,8 @@ const loading = ref(true)
 const submitting = ref(false)
 const currentQuestionIndex = ref(0)
 const statusBarHeight = ref(20)
-const navbarBg = ref('#0B1D3A')
-const isTransitioning = ref(false)
+const navbarBg = ref('#0B1D3A') /* $brand-deep-blue */
+const swiperHeight = ref(400)
 
 // Get session ID from route
 const pages = getCurrentPages()
@@ -139,11 +146,27 @@ const progressPercent = computed(() => {
   return Math.round((answered / totalQuestions.value) * 100)
 })
 
+// Calculate swiper height to fill remaining space
+function calcSwiperHeight() {
+  try {
+    const info = uni.getSystemInfoSync()
+    const windowHeight = info.windowHeight || 667
+    const navHeight = (statusBarHeight.value || 20) + 44 // status bar + navbar content
+    const progressBar = 2 // progress bar ~2px
+    const footerHeight = 80 // approximate footer height in px
+    swiperHeight.value = windowHeight - navHeight - progressBar - footerHeight
+  } catch (e) {
+    swiperHeight.value = 400
+  }
+}
+
 onMounted(async () => {
   try {
     const info = uni.getSystemInfoSync()
     statusBarHeight.value = info.statusBarHeight || 20
   } catch (e) { /* fallback */ }
+
+  calcSwiperHeight()
 
   if (!sessionId) {
     uni.showToast({ title: '参数错误', icon: 'none' })
@@ -152,10 +175,25 @@ onMounted(async () => {
     return
   }
 
-  // Load session
-  try {
-    await quizStore.loadSession(parseInt(sessionId))
-  } catch (e) {
+  const targetSessionId = parseInt(sessionId)
+
+  // If store already has the correct session (set by startQuiz), skip re-fetch
+  const existingSession = quizStore.currentSession
+  if (!existingSession || existingSession.sessionId !== targetSessionId) {
+    try {
+      await quizStore.loadSession(targetSessionId)
+    } catch (e) {
+      uni.showToast({ title: '加载答题失败', icon: 'none' })
+      setTimeout(() => uni.navigateBack(), 1500)
+      loading.value = false
+      return
+    }
+  }
+
+  // Give Vue a tick to flush reactivity
+  await nextTick()
+
+  if (!session.value) {
     uni.showToast({ title: '加载答题失败', icon: 'none' })
     setTimeout(() => uni.navigateBack(), 1500)
     loading.value = false
@@ -163,7 +201,7 @@ onMounted(async () => {
   }
 
   // Check if session is already submitted
-  if (session.value?.status !== 'IN_PROGRESS') {
+  if (session.value.status !== 'IN_PROGRESS') {
     uni.redirectTo({
       url: `/pages/result/result?sessionId=${sessionId}`
     })
@@ -174,7 +212,7 @@ onMounted(async () => {
   loading.value = false
 
   // Find first unanswered question
-  if (session.value?.questions) {
+  if (session.value.questions && session.value.questions.length > 0) {
     const firstUnanswered = session.value.questions.findIndex(q => !q.selectedOption)
     if (firstUnanswered >= 0) {
       currentQuestionIndex.value = firstUnanswered
@@ -215,7 +253,9 @@ async function handleAnswer({ questionId, option }) {
   try {
     await quizStore.answerQuestion(session.value.sessionId, questionId, option)
   } catch (e) {
-    // Error handled by interceptor
+    // Revert optimistic UI if API fails
+    const q = session.value?.questions?.find(q => q.id === questionId)
+    if (q) q.selectedOption = null
   }
 }
 
@@ -259,14 +299,11 @@ async function handleTimeout() {
   submitting.value = true
   uni.showToast({ title: '答题时间到，自动交卷', icon: 'none' })
   try {
-    // The session should have been auto-submitted by the backend
-    // Just navigate to result
     await userStore.refreshUser()
     uni.redirectTo({
       url: `/pages/result/result?sessionId=${session.value.sessionId}`
     })
   } catch (e) {
-    // ignore
     uni.redirectTo({
       url: `/pages/result/result?sessionId=${session.value.sessionId}`
     })
@@ -278,7 +315,6 @@ function handleBack() {
   if (backPressTimer) {
     clearTimeout(backPressTimer)
     backPressTimer = null
-    // Actually go back
     uni.navigateBack()
   } else {
     uni.showToast({ title: '再次点击退出答题', icon: 'none', duration: 2000 })
@@ -291,16 +327,16 @@ function handleBack() {
 
 <style lang="scss" scoped>
 .quiz-page {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: $bg-cool;
+  overflow: hidden;
 }
 
 .quiz {
   &__navbar {
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     z-index: 100;
     background: $brand-deep-blue;
     transition-property: background-color;
@@ -316,7 +352,11 @@ function handleBack() {
   }
 
   &__navbar-left {
-    width: 80rpx;
+    width: $touch-min;
+    height: $touch-min;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__navbar-back {
@@ -366,7 +406,6 @@ function handleBack() {
   }
 
   &__swiper {
-    flex: 1;
     width: 100%;
   }
 
@@ -380,42 +419,44 @@ function handleBack() {
   }
 
   &__footer {
+    flex-shrink: 0;
     background: $surface;
     padding: $spacing-2 $spacing-4;
     padding-bottom: calc($spacing-3 + env(safe-area-inset-bottom));
-    box-shadow: 0 -2rpx 16rpx rgba($brand-deep-blue, 0.06);
+    box-shadow: $shadow-top;
   }
 
   &__dots {
     display: flex;
     justify-content: center;
-    gap: 16rpx;
+    gap: 8rpx;
     margin-bottom: $spacing-3;
   }
 
   &__dot {
-    width: 32rpx;
-    height: 32rpx;
+    width: 40rpx;
+    height: 40rpx;
+    padding: 24rpx;            // touch area = 40+48 = 88rpx (44px)
+    box-sizing: content-box;
     border-radius: 50%;
     background: $divider;
+    background-clip: content-box;
     transition-property: background, transform;
     transition-duration: $duration-fast;
     transition-timing-function: $ease-out;
 
     &--active {
-      border: 3rpx solid $brand-cyan;
-      background: transparent;
-      transform: scale(1.25);
+      background-color: transparent;
+      box-shadow: inset 0 0 0 3rpx $brand-cyan;
     }
 
     &--answered {
-      background: $brand-cyan;
+      background-color: $brand-cyan;
     }
 
     &--current-answered {
-      background: $brand-cyan;
-      border: 3rpx solid $brand-cyan-dark;
-      transform: scale(1.25);
+      background-color: $brand-cyan;
+      box-shadow: inset 0 0 0 3rpx $brand-cyan-dark;
     }
   }
 
@@ -430,7 +471,7 @@ function handleBack() {
 
   &__nav-btn {
     flex: 1;
-    height: 80rpx;
+    min-height: $touch-min;
     border-radius: $radius-lg;
     font-size: $text-body;
     font-weight: 600;

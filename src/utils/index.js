@@ -50,10 +50,10 @@ export function formatDateRelative(dateStr) {
  * Convert score number to letter grade
  */
 export function scoreToGrade(score) {
-  if (score >= 90) return { grade: 'A', label: '优秀', color: '#22C55E' }
-  if (score >= 80) return { grade: 'B', label: '良好', color: '#0EA5E9' }
-  if (score >= 60) return { grade: 'C', label: '及格', color: '#F59E0B' }
-  return { grade: 'D', label: '加油', color: '#EF4444' }
+  if (score >= 90) return { grade: 'A', label: '优秀', color: '#22C55E' /* $success */ }
+  if (score >= 80) return { grade: 'B', label: '良好', color: '#0EA5E9' /* $brand-cyan */ }
+  if (score >= 60) return { grade: 'C', label: '及格', color: '#F59E0B' /* $warning */ }
+  return { grade: 'D', label: '加油', color: '#EF4444' /* $danger */ }
 }
 
 /**

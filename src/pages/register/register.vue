@@ -2,6 +2,7 @@
   <view class="register-page">
     <!-- Header -->
     <view class="reg__header">
+      <image class="reg__logo" src="/static/brand-logo.png" mode="aspectFit" />
       <text class="reg__header-title">实名注册</text>
       <text class="reg__header-desc">请填写真实信息，完成注册后即可开始答题</text>
     </view>
@@ -164,6 +165,7 @@ async function handleSubmit() {
   &__header {
     padding: $spacing-5 0 $spacing-4;
     margin-bottom: $spacing-3;
+    text-align: center;
 
     &-title {
       display: block;
@@ -180,6 +182,12 @@ async function handleSubmit() {
       color: $text-secondary;
       line-height: $leading-body;
     }
+  }
+
+  &__logo {
+    width: 320rpx;
+    height: 100rpx;
+    margin-bottom: $spacing-5;
   }
 
   &__form {

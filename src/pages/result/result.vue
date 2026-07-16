@@ -17,7 +17,7 @@
             :label="grade.label"
             :size="240"
             :stroke-width="14"
-            :color="grade.color"
+			:color="grade.color"
           />
         </view>
 
@@ -35,7 +35,7 @@
           <view class="result__stat-divider" />
           <view class="result__stat">
             <text class="result__stat-value">{{ isPassed ? '通过' : '未通过' }}</text>
-            <text class="result__stat-label" :style="{ color: isPassed ? '#22C55E' : '#EF4444' }">结果</text>
+            <text class="result__stat-label" :class="{ 'result__stat-label--pass': isPassed, 'result__stat-label--fail': !isPassed }">结果</text>
           </view>
         </view>
 
@@ -110,7 +110,7 @@ const sessionId = currentPage?.options?.sessionId
 const result = computed(() => quizStore.currentResult)
 
 const grade = computed(() => {
-  if (!result.value) return { grade: '-', label: '', color: '#64748B' }
+  if (!result.value) return { grade: '-', label: '', color: '#FFFFFF' /* $text-inverse */ }
   return scoreToGrade(result.value.score)
 })
 
@@ -167,6 +167,7 @@ function scrollToReview() {
 
   &__score-area {
     margin: $spacing-4 0;
+		color: $text-inverse;
   }
 
   &__stats {
@@ -198,6 +199,9 @@ function scrollToReview() {
     &-label {
       font-size: $text-xs;
       color: rgba(255, 255, 255, 0.55);
+      
+      &--pass { color: $success; }
+      &--fail { color: $danger; }
     }
 
     &-divider {
@@ -272,6 +276,7 @@ function scrollToReview() {
   &__actions {
     position: sticky;
     bottom: 0;
+    z-index: 10;
     display: flex;
     gap: $spacing-3;
     padding: $spacing-4;

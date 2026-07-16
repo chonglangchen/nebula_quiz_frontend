@@ -42,9 +42,9 @@ const props = defineProps({
   label: { type: String, default: '' },
   size: { type: Number, default: 200 }, // rpx
   strokeWidth: { type: Number, default: 12 }, // rpx
-  color: { type: String, default: '#0EA5E9' },
-  bgColor: { type: String, default: '#E2E8F0' },
-  textColor: { type: String, default: '#1E293B' }
+  color: { type: String, default: '#0EA5E9' /* $brand-cyan */ },
+  bgColor: { type: String, default: '#E2E8F0' /* $divider */ },
+  textColor: { type: String, default: '#ffffff' /* $text-inverse */ }
 })
 
 const clampedProgress = computed(() => Math.max(0, Math.min(1, props.progress)))

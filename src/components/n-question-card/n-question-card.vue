@@ -153,6 +153,7 @@ function handleSelect(key) {
   &__option {
     display: flex;
     align-items: center;
+    min-height: $touch-min;    // WCAG 2.5.5: ≥44px touch target
     padding: $spacing-3;
     background: $surface;
     border: 2rpx solid $divider;

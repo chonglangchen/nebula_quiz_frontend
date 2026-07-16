@@ -1,23 +1,21 @@
 <template>
   <view class="login-page">
     <view class="login__card">
-      <!-- Logo -->
+      <!-- Brand Logo -->
       <view class="login__logo-wrap">
-        <image class="login__logo" src="/static/logo.png" mode="aspectFit" />
+        <image class="login__logo" src="/static/brand-logo.png" mode="aspectFit" />
       </view>
-      <text class="login__title">星云答题</text>
 
       <!-- Form -->
       <view class="login__form">
         <view class="login__field">
-          <text class="login__label">手机号</text>
+          <text class="login__label">账号</text>
           <input
             class="login__input"
             v-model="phone"
-            type="number"
-            placeholder="请输入手机号"
+            type="text"
+            placeholder="请输入账号名或手机号"
             placeholder-style="color: #94A3B8"
-            maxlength="11"
           />
         </view>
         <view class="login__field">
@@ -56,7 +54,7 @@ const phone = ref('')
 const password = ref('')
 
 const valid = computed(() => {
-  return /^1[3-9]\d{9}$/.test(phone.value) && password.value.length > 0
+  return phone.value.trim().length > 0 && password.value.length > 0
 })
 
 async function handleLogin() {
@@ -107,28 +105,16 @@ async function handleLogin() {
   }
 
   &__logo-wrap {
-    width: 120rpx;
-    height: 120rpx;
-    border-radius: $radius-xl;
-    background: $bg-cool;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: $spacing-3;
+    margin-bottom: $spacing-6;
   }
 
   &__logo {
-    width: 80rpx;
-    height: 80rpx;
-  }
-
-  &__title {
-    font-family: $font-display;
-    font-size: $text-h2;
-    font-weight: 700;
-    color: $text-primary;
-    letter-spacing: $tracking-heading;
-    margin-bottom: $spacing-6;
+    width: 320rpx;
+    height: 100rpx;
   }
 
   &__form {

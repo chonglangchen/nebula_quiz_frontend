@@ -21,7 +21,6 @@
           v-model="oldPassword"
           type="password"
           placeholder="请输入原密码"
-          placeholder-style="color: #94A3B8"
         />
       </view>
       <view class="cp__field">
@@ -31,7 +30,6 @@
           v-model="newPassword"
           type="password"
           placeholder="请输入新密码（至少6位）"
-          placeholder-style="color: #94A3B8"
         />
       </view>
       <view class="cp__field">
@@ -41,7 +39,6 @@
           v-model="confirmPassword"
           type="password"
           placeholder="请再次输入新密码"
-          placeholder-style="color: #94A3B8"
         />
       </view>
     </view>
@@ -159,7 +156,7 @@ async function handleSubmit() {
   &__input {
     width: 100%;
     height: 72rpx;
-    font-size: $text-body;
+    font-size: $text-input;  /* 32rpx = 16px — prevents iOS zoom */
     color: $text-primary;
     background: transparent;
 
@@ -173,7 +170,7 @@ async function handleSubmit() {
   }
 
   &__footer {
-    padding-bottom: $spacing-4;
+    padding-bottom: calc($spacing-4 + env(safe-area-inset-bottom));
   }
 
   &__btn {

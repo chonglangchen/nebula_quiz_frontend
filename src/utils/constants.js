@@ -36,10 +36,10 @@ export const ROLES = {
 
 // ── Knowledge Domains ──
 export const DOMAINS = [
-  { id: 1, name: 'AI基础常识', color: '#0EA5E9' },
-  { id: 2, name: '国内主流大模型产品', color: '#14B8A6' },
-  { id: 3, name: 'AIGC日常应用', color: '#8B5CF6' },
-  { id: 4, name: 'AI办公效率工具', color: '#F59E0B' },
-  { id: 5, name: 'AI生活与服务应用', color: '#EC4899' },
-  { id: 6, name: 'AI安全与合规常识', color: '#EF4444' }
+  { id: 1, name: 'AI基础常识', color: '#0EA5E9' /* $brand-cyan */ },
+  { id: 2, name: '国内主流大模型产品', color: '#14B8A6' /* $brand-teal */ },
+  { id: 3, name: 'AIGC日常应用', color: '#8B5CF6' /* custom-purple */ },
+  { id: 4, name: 'AI办公效率工具', color: '#F59E0B' /* $warning */ },
+  { id: 5, name: 'AI生活与服务应用', color: '#EC4899' /* custom-pink */ },
+  { id: 6, name: 'AI安全与合规常识', color: '#EF4444' /* $danger */ }
 ]

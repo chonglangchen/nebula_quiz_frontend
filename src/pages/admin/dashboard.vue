@@ -147,11 +147,12 @@ function barHeight(count, max) {
 }
 
 function deptAvgColor(score) {
-  if (score == null) return '#94A3B8'
-  if (score >= 80) return '#22C55E'
-  if (score >= 60) return '#0EA5E9'
-  if (score >= 40) return '#F59E0B'
-  return '#EF4444'
+  // Maps to SCSS design tokens: $success, $brand-cyan, $warning, $danger
+  if (score == null) return '#94A3B8' /* $text-tertiary */
+  if (score >= 80) return '#22C55E' /* $success */
+  if (score >= 60) return '#0EA5E9' /* $brand-cyan */
+  if (score >= 40) return '#F59E0B' /* $warning */
+  return '#EF4444' /* $danger */
 }
 
 onMounted(async () => {
@@ -176,7 +177,7 @@ async function refresh() {
 .admin-page {
   min-height: 100vh;
   background: $bg-cool;
-  padding-bottom: $spacing-4;
+  padding-bottom: calc($spacing-4 + env(safe-area-inset-bottom));
 }
 
 .admin {
@@ -205,12 +206,12 @@ async function refresh() {
       .admin__card-label { color: rgba(255, 255, 255, 0.7); }
     }
     &--teal {
-      background: linear-gradient(135deg, $brand-teal, #0D9488);
+      background: linear-gradient(135deg, $brand-teal, $brand-teal-dark);
       .admin__card-value { color: $text-inverse; }
       .admin__card-label { color: rgba(255, 255, 255, 0.7); }
     }
     &--amber {
-      background: linear-gradient(135deg, $warning, #D97706);
+      background: linear-gradient(135deg, $warning, $brand-amber-dark);
       .admin__card-value { color: $text-inverse; }
       .admin__card-label { color: rgba(255, 255, 255, 0.7); }
     }

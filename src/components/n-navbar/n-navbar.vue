@@ -25,8 +25,8 @@ import { computed, ref, onMounted } from 'vue'
 const props = defineProps({
   title: { type: String, default: '' },
   showBack: { type: Boolean, default: false },
-  backgroundColor: { type: String, default: '#0B1D3A' },
-  textColor: { type: String, default: '#FFFFFF' }
+  backgroundColor: { type: String, default: '#0B1D3A' /* $brand-deep-blue */ },
+  textColor: { type: String, default: '#FFFFFF' /* $text-inverse */ }
 })
 
 const emit = defineEmits(['back'])
@@ -72,13 +72,13 @@ function handleBack() {
   }
 
   &__left {
-    width: 80rpx;
+    width: $touch-min;
     flex-shrink: 0;
   }
 
   &__back {
-    width: 60rpx;
-    height: 60rpx;
+    width: $touch-min;
+    height: $touch-min;
     display: flex;
     align-items: center;
     justify-content: center;

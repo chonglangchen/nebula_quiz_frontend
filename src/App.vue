@@ -21,6 +21,10 @@ export default {
 @import '@/uni.scss';
 
 /* ── Global Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 page {
   font-family: $font-body;
   font-size: $text-body;
@@ -75,6 +79,22 @@ input, textarea, button {
     outline: 2rpx solid $brand-cyan;
     outline-offset: 2rpx;
   }
+}
+
+/* ── Mobile H5: force input font-size ≥ 16px to prevent iOS auto-zoom ── */
+input, textarea, [contenteditable] {
+  font-size: $text-input !important;  /* 32rpx = 16px @375px */
+}
+
+/* ── Mobile H5: global placeholder color ── */
+input::placeholder, textarea::placeholder {
+  color: $text-tertiary;
+}
+
+/* ── Mobile H5: minimum touch target size (WCAG 2.5.5) ── */
+button, [role="button"], .clickable {
+  min-height: $touch-min;
+  min-width: $touch-min;
 }
 
 /* ── Link styles ── */
