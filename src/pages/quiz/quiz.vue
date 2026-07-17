@@ -138,6 +138,15 @@ const pages = getCurrentPages()
 const currentPage = pages[pages.length - 1]
 const sessionId = currentPage?.options?.sessionId
 
+// Parse backend error details to find which question IDs the server flagged as unanswered.
+// Details format: [{questionId: "123"}, ...]
+function extractUnansweredIds(details) {
+  if (!details || !Array.isArray(details)) return []
+  return details
+    .map(d => (typeof d.questionId === 'string' ? parseInt(d.questionId) : d.questionId))
+    .filter(id => Number.isFinite(id))
+}
+
 const session = computed(() => quizStore.currentSession)
 const totalQuestions = computed(() => session.value?.questions?.length || 0)
 const progressPercent = computed(() => {
@@ -253,9 +262,8 @@ async function handleAnswer({ questionId, option }) {
   try {
     await quizStore.answerQuestion(session.value.sessionId, questionId, option)
   } catch (e) {
-    // Revert optimistic UI if API fails
-    const q = session.value?.questions?.find(q => q.id === questionId)
-    if (q) q.selectedOption = null
+    // Store already reverts on failure — just show the error.
+    // No need to touch selectedOption here; the store handles it.
   }
 }
 
@@ -283,13 +291,25 @@ async function handleSubmit() {
     })
   } catch (e) {
     submitting.value = false
-    // If error is "has unanswered questions", navigate to first unanswered
+    // If backend says there are unanswered questions, highlight them using the
+    // error details (which contain the specific question IDs the server flagged).
     if (e.message?.includes('未作答')) {
+      // Use backend error details to pinpoint which questions need attention.
+      // Fall back to local state if details aren't available.
+      const detailIds = extractUnansweredIds(e.details)
+      if (detailIds.length > 0) {
+        // Reset only the questions the backend flagged as unanswered
+        for (const q of session.value.questions) {
+          if (detailIds.includes(q.id)) {
+            q.selectedOption = null
+          }
+        }
+      }
       const firstUnanswered = session.value.questions.findIndex(q => !q.selectedOption)
       if (firstUnanswered >= 0) {
         currentQuestionIndex.value = firstUnanswered
-        uni.showToast({ title: '请先完成所有题目', icon: 'none' })
       }
+      uni.showToast({ title: '请先完成所有题目', icon: 'none' })
     }
   }
 }

@@ -56,8 +56,11 @@ async function request({ url, method = 'GET', data = null, header = {}, skipAuth
 
     // Other errors
     const message = body?.error?.message || '请求失败'
+    const details = body?.error?.details || null
     uni.showToast({ title: message, icon: 'none', duration: 2000 })
-    return Promise.reject(new Error(message))
+    const err = new Error(message)
+    err.details = details
+    return Promise.reject(err)
   } catch (e) {
     if (e.errMsg && e.errMsg.includes('request:fail')) {
       uni.showToast({ title: '网络连接失败', icon: 'none', duration: 2000 })

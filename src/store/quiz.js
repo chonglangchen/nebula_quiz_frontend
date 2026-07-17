@@ -57,13 +57,31 @@ export const useQuizStore = defineStore('quiz', () => {
   }
 
   async function answerQuestion(sessionId, questionId, option) {
-    const result = await saveAnswer(sessionId, questionId, option)
-    // Update local state
+    // Optimistic update: set the answer immediately so the UI responds instantly.
+    // Remember the previous value so we can properly revert on failure.
+    let previousOption = null
     if (currentSession.value?.questions) {
       const q = currentSession.value.questions.find(q => q.id === questionId)
-      if (q) q.selectedOption = option
+      if (q) {
+        previousOption = q.selectedOption
+        q.selectedOption = option
+      }
     }
-    return result
+    try {
+      const result = await saveAnswer(sessionId, questionId, option)
+      return result
+    } catch (e) {
+      // Only revert if our optimistic value is still the current selection.
+      // If the user already picked a different option (fast tap A→B), the
+      // later pick's value should be preserved even if this API call failed.
+      if (currentSession.value?.questions) {
+        const q = currentSession.value.questions.find(q => q.id === questionId)
+        if (q && q.selectedOption === option) {
+          q.selectedOption = previousOption
+        }
+      }
+      throw e
+    }
   }
 
   async function submitCurrentQuiz(sessionId) {
