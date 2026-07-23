@@ -101,20 +101,20 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "iconPath": "src/static/tab/home.png",
-        "selectedIconPath": "src/static/tab/home-active.png",
+        "iconPath": "static/tab/home.png",
+        "selectedIconPath": "static/tab/home-active.png",
         "text": "首页"
       },
       {
         "pagePath": "pages/history/history",
-        "iconPath": "src/static/tab/history.png",
-        "selectedIconPath": "src/static/tab/history-active.png",
+        "iconPath": "static/tab/history.png",
+        "selectedIconPath": "static/tab/history-active.png",
         "text": "记录"
       },
       {
         "pagePath": "pages/mine/mine",
-        "iconPath": "src/static/tab/mine.png",
-        "selectedIconPath": "src/static/tab/mine-active.png",
+        "iconPath": "static/tab/mine.png",
+        "selectedIconPath": "static/tab/mine-active.png",
         "text": "我的"
       }
     ]

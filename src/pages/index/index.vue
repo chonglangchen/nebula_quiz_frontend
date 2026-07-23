@@ -15,18 +15,61 @@
       </view>
     </view>
 
-    <!-- Today's status card -->
-    <view class="home__today-card">
-      <!-- Loading -->
-      <template v-if="quizStore.loading">
-        <view class="home__loading">
-          <n-skeleton height="48" :radius="12" style="margin-bottom: 16rpx" />
-          <n-skeleton height="32" :radius="8" width="60%" />
+    <!-- ====== Intro Modal — shown once per day ====== -->
+    <view
+      v-if="showIntro"
+      class="home__modal-overlay"
+      @tap="dismissIntro"
+      @touchmove.stop.prevent
+    >
+      <view class="home__modal-card" @tap.stop>
+        <view class="home__modal-head">
+          <text class="home__modal-title">关于开展AI知识答题竞赛的通知</text>
         </view>
-      </template>
 
+        <scroll-view class="home__modal-scroll" scroll-y>
+          <view class="home__modal-body">
+            <text class="home__modal-text">
+              为贯彻落实国务院、省国资委关于加快推进省属企业智能体应用研究和人工智能赋能管理提升的有关要求，进一步服务集团数智化转型发展大局，根据集团对各部门、各权属企业干部职工关于人工智能应用意识和实操能力的要求，并依据《福建省大数据集团"智汇数据·AI赋能"AI效能提升行动方案》安排，现开展星云公司AI知识答题竞赛。
+            </text>
+          </view>
+
+          <view class="home__modal-notice">
+            <text class="home__modal-notice-text">
+              题库共计200题，每日随机抽选5题，完成全部200题的同志可以凭答题平台页面至星云工会办公室处领取纪念礼品。
+            </text>
+          </view>
+
+          <image class="home__modal-image" src="/static/ai.png" mode="widthFix" />
+        </scroll-view>
+
+        <view class="home__modal-footer">
+          <button
+            class="home__modal-btn"
+            hover-class="home__modal-btn--hover"
+            @tap="dismissIntro"
+          >
+            <text class="home__modal-btn-text">我知道了</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- ====== Main content card ====== -->
+    <view v-if="quizStore.canStart" class="home__card">
+      <button
+        class="home__go-btn"
+        hover-class="home__go-btn--hover"
+        @tap="startQuiz"
+      >
+        <text class="home__go-btn-text">去答题</text>
+      </button>
+    </view>
+
+    <!-- Today's status card — only when not in NOT_STARTED state -->
+    <view v-if="!quizStore.canStart && !quizStore.loading" class="home__today-card">
       <!-- Training required -->
-      <template v-else-if="quizStore.isTrainingRequired">
+      <template v-if="quizStore.isTrainingRequired">
         <view class="home__status">
           <text class="home__status-title">请先完成培训确认</text>
           <text class="home__status-desc">首次答题前需要阅读培训材料</text>
@@ -71,17 +114,6 @@
           <text class="home__status-desc">您已答完题库中所有200道题目</text>
         </view>
       </template>
-
-      <!-- Not started (can start) -->
-      <template v-else>
-        <view class="home__status">
-          <text class="home__status-title">今日答题待挑战</text>
-          <text class="home__status-desc">{{ todayInfo.questionCount }}道题目 / {{ todayInfo.durationMinutes }}分钟限时 / 每天限答1次</text>
-        </view>
-        <button class="home__cta" hover-class="home__cta--hover" @tap="startQuiz">
-          <text class="home__cta-text">开始答题</text>
-        </button>
-      </template>
     </view>
 
     <!-- Quick stats -->
@@ -107,7 +139,6 @@ import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { useQuizStore } from '@/store/quiz'
-import { QUIZ_CONFIG } from '@/utils/constants'
 
 const userStore = useUserStore()
 const quizStore = useQuizStore()
@@ -122,10 +153,28 @@ const greetingText = computed(() => {
   return '晚上好，'
 })
 
-const todayInfo = computed(() => ({
-  questionCount: quizStore.todayStatus?.questionCount || QUIZ_CONFIG.DAILY_QUESTION_COUNT,
-  durationMinutes: Math.floor((quizStore.todayStatus?.durationSeconds || QUIZ_CONFIG.DURATION_SECONDS) / 60)
-}))
+// ── Intro modal: show once per day ──
+const INTRO_DISMISS_KEY = 'quiz_intro_dismissed'
+
+function getDismissedDate() {
+  try {
+    return uni.getStorageSync(INTRO_DISMISS_KEY) || ''
+  } catch (_) {
+    return ''
+  }
+}
+
+function todayStr() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const showIntro = ref(getDismissedDate() !== todayStr())
+
+function dismissIntro() {
+  showIntro.value = false
+  uni.setStorageSync(INTRO_DISMISS_KEY, todayStr())
+}
 
 onMounted(async () => {
   await userStore.refreshUser().catch(() => {})
@@ -178,6 +227,7 @@ function goHistory() {
 }
 
 .home {
+  // ── Hero ──
   &__hero {
     background: $gradient-brand;
     padding-bottom: $spacing-8;
@@ -238,8 +288,114 @@ function goHistory() {
     margin-top: 4rpx;
   }
 
-  // Today card
-  &__today-card {
+  // ── Intro Modal ──
+  &__modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-6 $spacing-4;
+  }
+
+  &__modal-card {
+    width: 100%;
+    max-width: 640rpx;
+    max-height: 80vh;
+    background: $surface;
+    border-radius: $radius-xl;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.25);
+  }
+
+  &__modal-head {
+    padding: $spacing-5 $spacing-4 $spacing-3;
+    text-align: center;
+  }
+
+  &__modal-title {
+    font-family: $font-display;
+    font-size: $text-h3;
+    font-weight: 700;
+    color: $brand-deep-blue;
+    letter-spacing: $tracking-heading;
+    line-height: 1.5;
+  }
+
+  &__modal-scroll {
+    flex: 1;
+    padding: 0 $spacing-4;
+  }
+
+  &__modal-body {
+    margin-bottom: $spacing-3;
+  }
+
+  &__modal-text {
+    font-size: $text-body-sm;
+    color: $text-primary;
+    line-height: 1.8;
+    font-family: $font-body;
+  }
+
+  &__modal-notice {
+    background: $danger-light;
+    border-left: 6rpx solid $danger;
+    border-radius: 0 $radius-sm $radius-sm 0;
+    padding: $spacing-3;
+    margin-bottom: $spacing-2;
+  }
+
+  &__modal-notice-text {
+    font-size: $text-body-sm;
+    color: $danger;
+    font-weight: 600;
+    line-height: 1.7;
+  }
+
+  &__modal-image {
+    width: 100%;
+    display: block;
+    border-radius: $radius-lg;
+    margin-top: $spacing-3;
+  }
+
+  &__modal-footer {
+    padding: $spacing-3 $spacing-4 $spacing-5;
+  }
+
+  &__modal-btn {
+    width: 100%;
+    height: 88rpx;
+    background: $gradient-cyan;
+    border-radius: $radius-lg;
+    border: none;
+    box-shadow: $shadow-btn;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition-property: transform, opacity;
+    transition-duration: $duration-fast;
+    transition-timing-function: $ease-out;
+
+    &--hover {
+      opacity: 0.85;
+      transform: scale(0.98);
+    }
+
+    &-text {
+      font-size: $text-body;
+      font-weight: 600;
+      color: $text-inverse;
+    }
+  }
+
+  // ── Main content card (only shows when canStart) ──
+  &__card {
     margin: -$spacing-3 $spacing-4 0;
     background: $surface;
     border-radius: $radius-xl;
@@ -247,6 +403,41 @@ function goHistory() {
     box-shadow: $shadow-elevated;
     position: relative;
     z-index: 2;
+  }
+
+  &__go-btn {
+    width: 100%;
+    height: 96rpx;
+    background: $gradient-cyan;
+    border-radius: $radius-lg;
+    border: none;
+    box-shadow: $shadow-btn;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition-property: transform, opacity;
+    transition-duration: $duration-fast;
+    transition-timing-function: $ease-out;
+
+    &--hover {
+      opacity: 0.85;
+      transform: scale(0.98);
+    }
+
+    &-text {
+      font-size: $text-body;
+      font-weight: 600;
+      color: $text-inverse;
+    }
+  }
+
+  // ── Today card ──
+  &__today-card {
+    margin: $spacing-4 $spacing-4 0;
+    background: $surface;
+    border-radius: $radius-xl;
+    padding: $spacing-5 $spacing-4;
+    box-shadow: $shadow-elevated;
     text-align: center;
   }
 
@@ -331,7 +522,7 @@ function goHistory() {
     }
   }
 
-  // Quick stats
+  // ── Quick stats ──
   &__quick-stats {
     display: flex;
     margin: $spacing-4;
