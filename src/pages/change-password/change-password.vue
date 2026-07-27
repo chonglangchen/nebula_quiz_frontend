@@ -7,10 +7,10 @@
 
     <view class="cp__form">
       <view class="cp__field">
-        <text class="cp__label">手机号</text>
+        <text class="cp__label">员工姓名</text>
         <input
           class="cp__input cp__input--disabled"
-          :value="phone"
+          :value="displayName"
           disabled
         />
       </view>
@@ -64,7 +64,7 @@ import { useUserStore } from '@/store/user'
 
 const userStore = useUserStore()
 const loading = ref(false)
-const phone = ref('')
+const displayName = ref('')
 const oldPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
@@ -77,7 +77,7 @@ const valid = computed(() => {
 })
 
 onMounted(() => {
-  phone.value = uni.getStorageSync('nq_temp_phone') || ''
+  displayName.value = uni.getStorageSync('nq_temp_name') || ''
 })
 
 async function handleSubmit() {
@@ -88,7 +88,7 @@ async function handleSubmit() {
     // Re-fetch user info to sync
     const user = await getUserInfo()
     userStore.setUser(user)
-    uni.removeStorageSync('nq_temp_phone')
+    uni.removeStorageSync('nq_temp_name')
     uni.showToast({ title: '密码修改成功', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/index/index' })

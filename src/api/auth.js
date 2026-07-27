@@ -2,13 +2,35 @@ import { get, post, saveTokens, clearTokens } from './request'
 import { STORAGE_KEYS } from '@/utils/constants'
 
 /**
- * Login with phone + password.
+ * Register a new user after WeChat auth.
+ * POST /api/v1/auth/register
+ */
+export async function register({ registrationToken, realName, employeeNo, departmentCode, phone }) {
+  return post('/api/v1/auth/register', {
+    registrationToken,
+    realName,
+    employeeNo,
+    departmentCode,
+    phone: phone || ''
+  }, { skipAuth: true })
+}
+
+/**
+ * Fetch department list for registration form.
+ * GET /api/v1/metadata/departments
+ */
+export async function fetchDepartments() {
+  return get('/api/v1/metadata/departments', {}, { skipAuth: true })
+}
+
+/**
+ * Login with realName + password.
  * POST /api/v1/auth/login
  * Returns data: { accessToken, refreshToken, user, mustChangePassword }
  */
-export async function passwordLogin(phone, password) {
+export async function passwordLogin(realName, password) {
   const data = await post('/api/v1/auth/login', {
-    phone,
+    realName,
     password
   }, { skipAuth: true })
 

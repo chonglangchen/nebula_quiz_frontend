@@ -38,7 +38,6 @@
       class="quiz__swiper"
       :current="currentQuestionIndex"
       :duration="300"
-      :style="{ height: swiperHeight + 'px' }"
       @change="handleSwipeChange"
       @animationfinish="handleSwipeFinish"
     >
@@ -104,16 +103,18 @@
         >
           <text>下一题</text>
         </button>
-        <button
-          v-else
-          class="quiz__nav-btn quiz__nav-btn--submit"
-          hover-class="quiz__nav-btn--hover"
-          :loading="submitting"
-          @tap="handleSubmit"
-        >
-          <text>交卷</text>
-        </button>
+        <view v-else class="quiz__nav-spacer" />
       </view>
+
+      <!-- Submit button (always visible) -->
+      <button
+        class="quiz__submit-btn"
+        hover-class="quiz__nav-btn--hover"
+        :loading="submitting"
+        @tap="handleSubmit"
+      >
+        <text>交卷（{{ answeredCount }}/{{ totalQuestions }}）</text>
+      </button>
     </view>
   </view>
 </template>
@@ -131,7 +132,6 @@ const submitting = ref(false)
 const currentQuestionIndex = ref(0)
 const statusBarHeight = ref(20)
 const navbarBg = ref('#0B1D3A') /* $brand-deep-blue */
-const swiperHeight = ref(400)
 
 // Get session ID from route
 const pages = getCurrentPages()
@@ -149,33 +149,21 @@ function extractUnansweredIds(details) {
 
 const session = computed(() => quizStore.currentSession)
 const totalQuestions = computed(() => session.value?.questions?.length || 0)
+const answeredCount = computed(() => {
+  if (!session.value?.questions) return 0
+  return session.value.questions.filter(q => q.selectedOption).length
+})
 const progressPercent = computed(() => {
   if (!session.value?.questions) return 0
   const answered = session.value.questions.filter(q => q.selectedOption).length
   return Math.round((answered / totalQuestions.value) * 100)
 })
 
-// Calculate swiper height to fill remaining space
-function calcSwiperHeight() {
-  try {
-    const info = uni.getSystemInfoSync()
-    const windowHeight = info.windowHeight || 667
-    const navHeight = (statusBarHeight.value || 20) + 44 // status bar + navbar content
-    const progressBar = 2 // progress bar ~2px
-    const footerHeight = 80 // approximate footer height in px
-    swiperHeight.value = windowHeight - navHeight - progressBar - footerHeight
-  } catch (e) {
-    swiperHeight.value = 400
-  }
-}
-
 onMounted(async () => {
   try {
     const info = uni.getSystemInfoSync()
     statusBarHeight.value = info.statusBarHeight || 20
   } catch (e) { /* fallback */ }
-
-  calcSwiperHeight()
 
   if (!sessionId) {
     uni.showToast({ title: '参数错误', icon: 'none' })
@@ -347,7 +335,11 @@ function handleBack() {
 
 <style lang="scss" scoped>
 .quiz-page {
-  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   background: $bg-cool;
@@ -426,6 +418,7 @@ function handleBack() {
   }
 
   &__swiper {
+    flex: 1;
     width: 100%;
   }
 
@@ -448,19 +441,19 @@ function handleBack() {
 
   &__dots {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 8rpx;
     margin-bottom: $spacing-3;
+    padding: 0 8rpx;
   }
 
   &__dot {
-    width: 40rpx;
-    height: 40rpx;
-    padding: 24rpx;            // touch area = 40+48 = 88rpx (44px)
-    box-sizing: content-box;
+    width: 24rpx;
+    height: 24rpx;
     border-radius: 50%;
     background: $divider;
-    background-clip: content-box;
+    flex-shrink: 0;
     transition-property: background, transform;
     transition-duration: $duration-fast;
     transition-timing-function: $ease-out;
@@ -483,10 +476,29 @@ function handleBack() {
   &__nav {
     display: flex;
     gap: $spacing-3;
+    margin-bottom: $spacing-2;
   }
 
   &__nav-spacer {
     flex: 1;
+  }
+
+  &__submit-btn {
+    width: 100%;
+    min-height: $touch-min;
+    border-radius: $radius-lg;
+    font-size: $text-body;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: $gradient-cyan;
+    color: $text-inverse;
+    box-shadow: $shadow-btn;
+    transition-property: transform, opacity;
+    transition-duration: $duration-fast;
+    transition-timing-function: $ease-out;
   }
 
   &__nav-btn {

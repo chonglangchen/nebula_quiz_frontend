@@ -2,7 +2,13 @@
   <view class="home-page">
     <!-- Hero Banner -->
     <view class="home__hero">
-      <n-navbar title="星云答题" />
+      <n-navbar title="" />
+      <!-- Hero title -->
+      <view class="home__hero-title">
+        <image class="home__hero-logo" src="/static/home-logo.png" mode="aspectFit" />
+        <text class="home__hero-line2">"智学 AI·竞逐未来"</text>
+        <text class="home__hero-line3">AI知识答题</text>
+      </view>
       <view class="home__welcome">
         <view class="home__greeting">
           <text class="home__greeting-text">{{ greetingText }}</text>
@@ -36,7 +42,7 @@
 
           <view class="home__modal-notice">
             <text class="home__modal-notice-text">
-              题库共计200题，每日随机抽选5题，完成全部200题的同志可以凭答题平台页面至星云工会办公室处领取纪念礼品。
+              题库共计200题，每日随机抽选20题，完成全部200题的同志可以凭答题平台页面至星云工会办公室处领取纪念礼品。
             </text>
           </view>
 
@@ -230,11 +236,46 @@ function goHistory() {
   // ── Hero ──
   &__hero {
     background: $gradient-brand;
-    padding-bottom: $spacing-8;
+    padding-bottom: 56rpx;
+  }
+
+  &__hero-title {
+    padding: 16rpx $spacing-4 40rpx;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__hero-logo {
+    width: 480rpx;
+    height: 360rpx;
+    margin-bottom: $spacing-3;
+  }
+
+  &__hero-line2 {
+    display: block;
+    font-family: $font-display;
+    font-size: 52rpx;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 6rpx;
+    margin-bottom: $spacing-3;
+    text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+  }
+
+  &__hero-line3 {
+    display: block;
+    font-family: $font-display;
+    font-size: 52rpx;
+    font-weight: 700;
+    color: $text-inverse;
+    letter-spacing: 8rpx;
+    text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.12);
   }
 
   &__welcome {
-    padding: 0 $spacing-4;
+    padding: 16rpx $spacing-4 0;
   }
 
   &__greeting {
@@ -396,7 +437,7 @@ function goHistory() {
 
   // ── Main content card (only shows when canStart) ──
   &__card {
-    margin: -$spacing-3 $spacing-4 0;
+    margin: -40rpx $spacing-4 0;
     background: $surface;
     border-radius: $radius-xl;
     padding: $spacing-5 $spacing-4;

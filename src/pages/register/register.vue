@@ -2,7 +2,7 @@
   <view class="register-page">
     <!-- Header -->
     <view class="reg__header">
-      <image class="reg__logo" src="/static/brand-logo.png" mode="aspectFit" />
+      <image class="reg__logo" src="/static/brand-logo.jpg" mode="aspectFit" />
       <text class="reg__header-title">实名注册</text>
       <text class="reg__header-desc">请填写真实信息，完成注册后即可开始答题</text>
     </view>
@@ -47,19 +47,6 @@
           </view>
         </picker>
       </view>
-
-      <!-- Phone -->
-      <view class="reg__field">
-        <text class="reg__label">手机号</text>
-        <input
-          class="reg__input"
-          v-model="form.phone"
-          type="number"
-          placeholder="请输入11位手机号"
-          placeholder-style="color: #94A3B8"
-          maxlength="11"
-        />
-      </view>
     </view>
 
     <!-- Submit -->
@@ -102,15 +89,13 @@ const form = reactive({
   realName: '',
   employeeNo: '',
   departmentCode: '',
-  departmentName: '',
-  phone: ''
+  departmentName: ''
 })
 
 const valid = computed(() => {
   return form.realName.length >= 2
     && form.employeeNo.length > 0
     && form.departmentCode.length > 0
-    && /^1[3-9]\d{9}$/.test(form.phone)
 })
 
 onMounted(async () => {
@@ -138,8 +123,7 @@ async function handleSubmit() {
       registrationToken: registrationToken.value,
       realName: form.realName,
       employeeNo: form.employeeNo,
-      departmentCode: form.departmentCode,
-      phone: form.phone
+      departmentCode: form.departmentCode
     })
     userStore.setUser(payload.user)
     uni.showToast({ title: '注册成功', icon: 'success' })
