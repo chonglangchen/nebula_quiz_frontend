@@ -26,14 +26,15 @@
       v-if="showIntro"
       class="home__modal-overlay"
       @tap="dismissIntro"
-      @touchmove.stop.prevent
     >
+      <!-- 背景触摸拦截层：阻止弹窗后页面滚动，不影响弹窗内 scroll-view -->
+      <view class="home__modal-overlay-bg" @touchmove.stop.prevent />
       <view class="home__modal-card" @tap.stop>
-        <view class="home__modal-head">
-          <text class="home__modal-title">关于开展AI知识答题竞赛的通知</text>
-        </view>
+        <view class="home__modal-scroll">
+          <view class="home__modal-head">
+            <text class="home__modal-title">关于开展AI知识答题竞赛的通知</text>
+          </view>
 
-        <scroll-view class="home__modal-scroll" scroll-y>
           <view class="home__modal-body">
             <text class="home__modal-text">
               为贯彻落实国务院、省国资委关于加快推进省属企业智能体应用研究和人工智能赋能管理提升的有关要求，进一步服务集团数智化转型发展大局，根据集团对各部门、各权属企业干部职工关于人工智能应用意识和实操能力的要求，并依据《福建省大数据集团"智汇数据·AI赋能"AI效能提升行动方案》安排，现开展星云公司AI知识答题竞赛。
@@ -47,16 +48,16 @@
           </view>
 
           <image class="home__modal-image" src="/static/ai.png" mode="widthFix" />
-        </scroll-view>
 
-        <view class="home__modal-footer">
-          <button
-            class="home__modal-btn"
-            hover-class="home__modal-btn--hover"
-            @tap="dismissIntro"
-          >
-            <text class="home__modal-btn-text">我知道了</text>
-          </button>
+          <view class="home__modal-footer">
+            <button
+              class="home__modal-btn"
+              hover-class="home__modal-btn--hover"
+              @tap="dismissIntro"
+            >
+              <text class="home__modal-btn-text">我知道了</text>
+            </button>
+          </view>
         </view>
       </view>
     </view>
@@ -336,19 +337,25 @@ function goHistory() {
     z-index: 999;
     background: rgba(0, 0, 0, 0.55);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     padding: $spacing-6 $spacing-4;
   }
 
+  &__modal-overlay-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
   &__modal-card {
+    position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 640rpx;
     max-height: 80vh;
     background: $surface;
     border-radius: $radius-xl;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
     box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.25);
   }
@@ -368,8 +375,10 @@ function goHistory() {
   }
 
   &__modal-scroll {
-    flex: 1;
-    padding: 0 $spacing-4;
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 $spacing-4 $spacing-4;
   }
 
   &__modal-body {
@@ -406,7 +415,7 @@ function goHistory() {
   }
 
   &__modal-footer {
-    padding: $spacing-3 $spacing-4 $spacing-5;
+    padding: $spacing-4 0 0;
   }
 
   &__modal-btn {

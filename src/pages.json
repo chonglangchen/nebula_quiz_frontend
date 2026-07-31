@@ -76,6 +76,15 @@
       }
     },
     {
+      "path": "pages/ranking/ranking",
+      "style": {
+        "navigationBarTitleText": "答题排名",
+        "navigationBarBackgroundColor": "#0B1D3A",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/mine/mine",
       "style": {
         "navigationBarTitleText": "我的",
@@ -110,6 +119,12 @@
         "iconPath": "static/tab/history.png",
         "selectedIconPath": "static/tab/history-active.png",
         "text": "记录"
+      },
+      {
+        "pagePath": "pages/ranking/ranking",
+        "iconPath": "static/tab/ranking.png",
+        "selectedIconPath": "static/tab/ranking-active.png",
+        "text": "排名"
       },
       {
         "pagePath": "pages/mine/mine",

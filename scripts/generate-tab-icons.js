@@ -130,9 +130,28 @@ function drawMine(png, c, thick) {
   lineAA(png, X(4), Y(14.5), X(20), Y(14.5), c, t)
 }
 
+function drawRanking(png, c, thick) {
+  const t = thick * SC
+  // Podium base
+  lineAA(png, X(3), Y(21), X(21), Y(21), c, t)
+  // 1st place (tallest, center) — position 10
+  lineAA(png, X(10), Y(21), X(10), Y(6), c, t)
+  lineAA(png, X(14), Y(21), X(14), Y(6), c, t)
+  lineAA(png, X(10), Y(6), X(14), Y(6), c, t)
+  // 2nd place (medium, left) — position 5
+  lineAA(png, X(5), Y(21), X(5), Y(12), c, t)
+  lineAA(png, X(9), Y(21), X(9), Y(12), c, t)
+  lineAA(png, X(5), Y(12), X(9), Y(12), c, t)
+  // 3rd place (shortest, right) — position 15
+  lineAA(png, X(15), Y(21), X(15), Y(16), c, t)
+  lineAA(png, X(19), Y(21), X(19), Y(16), c, t)
+  lineAA(png, X(15), Y(16), X(19), Y(16), c, t)
+}
+
 const icons = [
   { name: 'home', fn: drawHome },
   { name: 'history', fn: drawHistory },
+  { name: 'ranking', fn: drawRanking },
   { name: 'mine', fn: drawMine },
 ]
 

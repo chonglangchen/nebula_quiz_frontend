@@ -95,6 +95,77 @@
       </view>
     </template>
 
+    <!-- Export section -->
+    <view class="admin__section">
+      <text class="admin__section-title">数据导出</text>
+    </view>
+
+    <view class="admin__export-card">
+      <!-- Export 1: Employee details -->
+      <view class="admin__export-item">
+        <view class="admin__export-info">
+          <text class="admin__export-name">员工答题明细</text>
+          <text class="admin__export-desc">导出指定日期所有已答题员工的答题记录</text>
+        </view>
+        <view class="admin__export-controls">
+          <picker mode="date" :value="exportDate1" @change="e => exportDate1 = e.detail.value">
+            <view class="admin__export-date">
+              <text>{{ exportDate1 || '选择日期' }}</text>
+            </view>
+          </picker>
+          <view class="admin__export-btn" hover-class="admin__export-btn--hover" @tap="handleExport1">
+            <text class="admin__export-btn-text">导出</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Export 2: Department status -->
+      <view class="admin__export-item">
+        <view class="admin__export-info">
+          <text class="admin__export-name">部门员工答题情况</text>
+          <text class="admin__export-desc">导出指定部门所有员工在指定日期的答题状态</text>
+        </view>
+        <view class="admin__export-controls">
+          <picker mode="date" :value="exportDate2" @change="e => exportDate2 = e.detail.value">
+            <view class="admin__export-date">
+              <text>{{ exportDate2 || '选择日期' }}</text>
+            </view>
+          </picker>
+          <picker :range="deptOptions" @change="e => exportDept = deptOptions[e.detail.value]">
+            <view class="admin__export-date">
+              <text>{{ exportDept || '选择部门' }}</text>
+            </view>
+          </picker>
+          <view class="admin__export-btn" hover-class="admin__export-btn--hover" @tap="handleExport2">
+            <text class="admin__export-btn-text">导出</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Export 3: Participation rate -->
+      <view class="admin__export-item admin__export-item--last">
+        <view class="admin__export-info">
+          <text class="admin__export-name">部门参与率统计</text>
+          <text class="admin__export-desc">按日期和部门聚合统计参与人数与参与率</text>
+        </view>
+        <view class="admin__export-controls">
+          <picker mode="date" :value="exportStartDate" @change="e => exportStartDate = e.detail.value">
+            <view class="admin__export-date">
+              <text>{{ exportStartDate || '开始日期' }}</text>
+            </view>
+          </picker>
+          <picker mode="date" :value="exportEndDate" @change="e => exportEndDate = e.detail.value">
+            <view class="admin__export-date">
+              <text>{{ exportEndDate || '结束日期' }}</text>
+            </view>
+          </picker>
+          <view class="admin__export-btn" hover-class="admin__export-btn--hover" @tap="handleExport3">
+            <text class="admin__export-btn-text">导出</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- Refresh -->
     <view class="admin__refresh">
       <text class="admin__refresh-text" @tap="refresh">
@@ -106,7 +177,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { fetchDashboard } from '@/api/admin'
+import { fetchDashboard, exportEmployeeDetails, exportDepartmentStatus, exportParticipationRate } from '@/api/admin'
 import { formatDate } from '@/utils'
 
 const loading = ref(true)
@@ -124,6 +195,21 @@ const maxAnswered = computed(() => {
   if (!dashboard.trend?.length) return 1
   return Math.max(1, ...dashboard.trend.map(d => d.answeredUserCount))
 })
+
+// ── Export state ──
+const exportDate1 = ref('')
+const exportDate2 = ref('')
+const exportStartDate = ref('')
+const exportEndDate = ref('')
+const exportDept = ref('')
+const deptOptions = computed(() => {
+  return (dashboard.departments || []).map(d => d.departmentName)
+})
+
+function getTodayStr() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 function fmtPercent(val) {
   if (val == null) return '0'
@@ -165,11 +251,50 @@ async function refresh() {
     const data = await fetchDashboard()
     Object.assign(dashboard, data)
     lastUpdate.value = formatDate(new Date())
+    // Set default export dates
+    const today = getTodayStr()
+    if (!exportDate1.value) exportDate1.value = today
+    if (!exportDate2.value) exportDate2.value = today
+    if (!exportStartDate.value) exportStartDate.value = today
+    if (!exportEndDate.value) exportEndDate.value = today
   } catch (e) {
     // Error handled by interceptor
   } finally {
     loading.value = false
   }
+}
+
+// ── Export handlers ──
+async function handleExport1() {
+  if (!exportDate1.value) {
+    uni.showToast({ title: '请选择日期', icon: 'none' })
+    return
+  }
+  await exportEmployeeDetails(exportDate1.value)
+}
+
+async function handleExport2() {
+  if (!exportDate2.value) {
+    uni.showToast({ title: '请选择日期', icon: 'none' })
+    return
+  }
+  if (!exportDept.value) {
+    uni.showToast({ title: '请选择部门', icon: 'none' })
+    return
+  }
+  await exportDepartmentStatus(exportDate2.value, exportDept.value)
+}
+
+async function handleExport3() {
+  if (!exportStartDate.value) {
+    uni.showToast({ title: '请选择开始日期', icon: 'none' })
+    return
+  }
+  if (!exportEndDate.value) {
+    uni.showToast({ title: '请选择结束日期', icon: 'none' })
+    return
+  }
+  await exportParticipationRate(exportStartDate.value, exportEndDate.value)
 }
 </script>
 
@@ -384,6 +509,88 @@ async function refresh() {
   &__trend-score-people {
     font-size: $text-caption;
     color: $text-tertiary;
+  }
+
+  // Export
+  &__export-card {
+    margin: 0 $spacing-4;
+    background: $surface;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-soft;
+    overflow: hidden;
+  }
+
+  &__export-item {
+    padding: $spacing-4;
+    border-bottom: 1rpx solid $divider-light;
+
+    &--last {
+      border-bottom: none;
+    }
+  }
+
+  &__export-info {
+    margin-bottom: $spacing-3;
+  }
+
+  &__export-name {
+    display: block;
+    font-size: $text-body-sm;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  &__export-desc {
+    font-size: $text-xs;
+    color: $text-tertiary;
+  }
+
+  &__export-controls {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    flex-wrap: wrap;
+  }
+
+  &__export-date {
+    padding: $spacing-1 $spacing-3;
+    background: $surface-secondary;
+    border: 1rpx solid $divider;
+    border-radius: $radius-sm;
+    height: 64rpx;
+    display: flex;
+    align-items: center;
+
+    text {
+      font-size: $text-caption;
+      color: $text-secondary;
+    }
+  }
+
+  &__export-btn {
+    padding: $spacing-1 $spacing-4;
+    background: $gradient-cyan;
+    border-radius: $radius-sm;
+    height: 64rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: $shadow-btn;
+    transition-property: transform, opacity;
+    transition-duration: $duration-fast;
+    transition-timing-function: $ease-out;
+
+    &--hover {
+      opacity: 0.85;
+      transform: scale(0.96);
+    }
+
+    &-text {
+      font-size: $text-caption;
+      font-weight: 600;
+      color: $text-inverse;
+    }
   }
 
   // Refresh
