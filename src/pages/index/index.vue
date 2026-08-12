@@ -43,7 +43,7 @@
 
           <view class="home__modal-notice">
             <text class="home__modal-notice-text">
-              题库共计200题，每日随机抽选20题，完成全部200题的同志可以凭答题平台页面至星云工会办公室处领取纪念礼品。
+              本次AI知识答题竞赛已圆满结束，感谢各位同志的积极参与！答题功能已关闭，您仍可查看历史记录与错题回顾。
             </text>
           </view>
 
@@ -62,65 +62,11 @@
       </view>
     </view>
 
-    <!-- ====== Main content card ====== -->
-    <view v-if="quizStore.canStart" class="home__card">
-      <button
-        class="home__go-btn"
-        hover-class="home__go-btn--hover"
-        @tap="startQuiz"
-      >
-        <text class="home__go-btn-text">去答题</text>
-      </button>
-    </view>
-
-    <!-- Today's status card — only when not in NOT_STARTED state -->
-    <view v-if="!quizStore.canStart && !quizStore.loading" class="home__today-card">
-      <!-- Training required -->
-      <template v-if="quizStore.isTrainingRequired">
-        <view class="home__status">
-          <text class="home__status-title">请先完成培训确认</text>
-          <text class="home__status-desc">首次答题前需要阅读培训材料</text>
-        </view>
-        <button class="home__cta" hover-class="home__cta--hover" @tap="goTraining">
-          <text class="home__cta-text">前往确认</text>
-        </button>
-      </template>
-
-      <!-- In progress -->
-      <template v-else-if="quizStore.isInProgress">
-        <view class="home__status">
-          <view class="home__status-badge home__status-badge--active">
-            <text>答题中</text>
-          </view>
-          <text class="home__status-title">您有一场答题正在进行</text>
-          <text class="home__status-desc">继续完成今日的答题挑战</text>
-        </view>
-        <button class="home__cta" hover-class="home__cta--hover" @tap="continueQuiz">
-          <text class="home__cta-text">继续答题</text>
-        </button>
-      </template>
-
-      <!-- Submitted today -->
-      <template v-else-if="quizStore.isSubmitted">
-        <view class="home__status">
-          <view class="home__status-badge home__status-badge--done">
-            <text>已完成</text>
-          </view>
-          <text class="home__status-title">今日答题已完成</text>
-          <text class="home__status-desc">明天再来挑战新题目吧</text>
-        </view>
-        <button class="home__cta home__cta--secondary" hover-class="home__cta--hover" @tap="viewTodayResult">
-          <text class="home__cta-text--secondary">查看结果</text>
-        </button>
-      </template>
-
-      <!-- All completed -->
-      <template v-else-if="quizStore.isAllCompleted">
-        <view class="home__status">
-          <text class="home__status-title">恭喜完成全部题目</text>
-          <text class="home__status-desc">您已答完题库中所有200道题目</text>
-        </view>
-      </template>
+    <!-- ====== Quiz closed notice ====== -->
+    <view class="home__card home__card--closed">
+      <view class="home__closed-icon">⏰</view>
+      <text class="home__closed-title">答题活动已结束</text>
+      <text class="home__closed-desc">本次AI知识答题竞赛已圆满结束，感谢大家的积极参与！您仍可查看历史答题记录和错题回顾。</text>
     </view>
 
     <!-- Quick stats -->
@@ -453,6 +399,31 @@ function goHistory() {
     box-shadow: $shadow-elevated;
     position: relative;
     z-index: 2;
+
+    &--closed {
+      text-align: center;
+    }
+  }
+
+  &__closed-icon {
+    font-size: 64rpx;
+    margin-bottom: $spacing-3;
+  }
+
+  &__closed-title {
+    display: block;
+    font-family: $font-display;
+    font-size: $text-h2;
+    font-weight: 700;
+    color: $text-primary;
+    letter-spacing: $tracking-heading;
+    margin-bottom: $spacing-3;
+  }
+
+  &__closed-desc {
+    font-size: $text-body-sm;
+    color: $text-secondary;
+    line-height: 1.8;
   }
 
   &__go-btn {
